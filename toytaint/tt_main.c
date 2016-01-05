@@ -52,7 +52,7 @@ typedef
 static XArray* tainted;
 static WordFM* kvStore;
 
-static Addr taint;
+static Addr taint = NULL;
 
 static Int cmp_tainted_by_reg(const void* v1, const void* v2);
 static Word cmp_key_by_reg(UWord v1, UWord v2);
@@ -194,7 +194,7 @@ IRSB* tt_instrument ( VgCallbackClosure* closure,
 
       if (!st || st->tag == Ist_NoOp) continue;
 
-      if (1) {
+      if (0) {
          ppIRStmt(st);
          VG_(printf)("\n");
       }
@@ -252,18 +252,17 @@ static void tt_post_syscall(ThreadId tid, UInt syscallno,
 static void tt_make_mem_tainted(Addr a, SizeT len)
 {
    taint = a;
-   VG_(printf)("Making mem at %08lx tainted.\n", a);
+   VG_(printf)("Tainting mem at %08lx.\n", a);
 }
 
 static void tt_make_mem_untainted(Addr a, SizeT len)
 {
-   taint = 1;
+   taint = NULL;
    VG_(deleteXA)(tainted);
    tainted = 
       VG_(newXA)(VG_(malloc), "ss_tainted", VG_(free), sizeof(IRExpr));
    VG_(setCmpFnXA)(tainted, cmp_tainted_by_reg);
-   VG_(printf)("size of tainted == %d\n", VG_(sizeXA)(tainted));
-   VG_(printf)("Making mem at %08lx untainted.\n", a);
+   VG_(printf)("Untainting mem at %08lx.\n", a);
 }
 
 static Bool tt_handle_client_requests(ThreadId tid, UWord* arg, UWord* ret)
